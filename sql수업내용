@@ -3,3 +3,159 @@
 
 물리적 스키마: 데이터가 실제 저장되는 방식에 대한 정의
 논리적 스키마: 데이터베이스의 논리적 구조, 데이터간 관계와 제약 조건 등
+
+-- select mem_id, mem_name FROM member WHERE height between 163 AND 165;
+-- select mem_name, addr FROM member WHERE addr='경기' or addr='전남' or addr='경남';
+-- select mem_name, addr FROM member WHERE addr IN('경기', '전남', '경남');
+-- select * FROM member where mem_name LIKE '우%';
+-- select * FROM member where mem_name LIKE '__핑크';
+
+-- select * from member ORDER BY debut_date;
+-- #정렬 기본값은 ASC 오름차순임 , 내림차순 정렬을 원하면 DESC 입력
+-- select * from member ORDER BY debut_date DESC;
+
+-- select * from member where height>164 ORDER BY height DESC, debut_date ASC; 
+
+-- select * from member limit 3;
+
+-- select * from member order by debut_date limit 3;
+
+-- #limit : 출력 결과 수 제한
+-- #where 와 order by 조합에서는 조건식인 where를 먼저 구성
+-- #order by 정렬과 limit 조합에서는 limit을 뒤로 구성하여 정렬 된 후에 출력 수 제한
+-- #중복 결과 제거를 위한 distinct : 중복된 데이터는 1개만 남기고 보여주지 않음
+
+-- select addr from member;
+-- select addr from member Order by addr;
+-- select distinct addr from member Order by addr;
+
+#group by
+#having
+
+select mem_id "회원 아이디",sum(price * amount) "총 구매 수량 * 가격" from buy group by mem_id;
+select mem_id, avg(amount) "평균 구매 수량" from buy  group by mem_id;
+
+select count(*) from member;
+select count(phone1) '연락처 있는 회원' from member;
+
+select mem_id '회원 아이디', sum(price*amount) '총 지출' from buy group by mem_id;
+#group by 그룹화 상태에서 where 대신 having 절로 조건 제한
+#having은 집계 함수에 대해서 조건을 제한하는 것
+#having은 group by 뒤에 위치
+
+select mem_id "회원 아이디", sum(price*amount) "총 지출" from buy group by mem_id having sum(price*amount)<1000 Order by sum(price*amount) DESC limit 1;
+
+#데이터의 조회 select
+#select * from member;
+
+#데이터의 삽입 insert
+#insert into 테이블(열1, 열2, 열3) values (값1, 값2, 값3);
+#테이블명 뒤에 나오는 열 이름 생략 가능
+#열 이름 생략한 경우에는 values다음 나오는 값의 순서와 개수를 정확하게
+
+use market_db; #어떤 db인지 지정
+create table hongong1 (toy_id INT, toy_name CHAR(4), age INT);
+#테이블 생성
+INSERT INTO hongong1 values(1,'우디',25);
+#생성한 테이블에 데이터 삽입 
+
+select * from hongong1;
+INSERT INTO hongong1 (toy_id, toy_name) values(2,'버즈');
+INSERT INTO hongong1 (toy_name, age, toy_id) values('제시',20,3);
+
+create table hongong2 (
+toy_id INT AUTO_INCREMENT PRIMARY KEY, 
+toy_name CHAR(4),
+age INT);
+
+select * from hongong2;
+
+INSERT INTO hongong2 VALUES (NULL,'보핍',25);
+INSERT INTO hongong2 VALUES (NULL,'슬링키',22);
+INSERT INTO hongong2 VALUES (NULL,'렉스',21);
+INSERT INTO hongong2 VALUES (NULL,'보핍',25),(NULL,'슬링키',22),(NULL,'렉스',21);
+SELECT last_insert_id();
+#auto incrementsms 1부터 시작
+#last_insert_id()로 마지막 번호 확인
+
+#ALTER 표현 : 테이블 수정
+ALTER TABLE hongong2 auto_increment=100;
+INSERT INTO hongong2 values(null,'rrr','33');
+Select * from hongong2;
+
+SELECT COUNT(*) FROM world.city;
+
+DESC world.city;
+
+SELECT * FROM world.city limit 5;
+CREATE TABLE city_popul (city_name CHAR(35), population INT);
+INSERT INTO city_popul select Name, Population From world.city;
+SELECT * FROM city_popul;
+
+#UPDATE 데이터의 수정
+#update 테이블 set 열1=값1, 열2=값2 where 조건
+
+UPDATE city_popul
+SET city_name = '서울'
+WHERE city_name = 'Seoul';
+SELECT * FROM city_popul WHERE city_name = '서울';
+SELECT * FROM city_popul;
+
+UPDATE city_popul
+SET city_name = '뉴욕', population = 0
+WHERE city_name = 'New York';
+SELECT * FROM city_popul WHERE city_name = '뉴욕';
+
+UPDATE city_popul
+SET population = population / 10000;
+select * FROM city_popul LIMIT 5;
+
+#데이터의 삭제 delete
+#DELETE FROM 테이블명 WHERE 조건;
+DELETE FROM city_popul
+WHERE city_name LIKE 'New%' LIMIT 5;
+
+#tinyint smallint int bigint
+#unsigned alter
+#char : 고정길이 문자 char(10) => 3글자 입력 나머지 7글자 공간 낭비
+#varchar : 가변길이 문자형 varchar(10) => 3글자 입력 3칸만 사용
+#mysql내부적으로 성능면에서는 char가 빠름
+
+#char는 255자 까지
+#varchar는 16383자 까지 지정 가능
+
+#text형싱과 blob 형식 char로 지정하기에 더 큰 데이터 저장 공간 필요할 때
+#blob : binary long object
+
+#float 4바이트
+#double 8바이트
+
+#DATE 3바이트 날짜만 저장 yyyy-mm-dd 형식으로 지정
+#TIME 3바이트 시간만 저장 HH:MM:SS 형식
+#DATETIME 8바이트 YYYY-MM-dd HH:MM:SS
+
+USE market_db;
+SELECT num, B.mem_id, prod_name FROM buy B INNER JOIN member M ON B.mem_id = M.mem_id where B.mem_id = 'GRL';
+
+#내부 조인은 양쪽 테이블에 모두 있는 필드 기반으로 조인 : mem_id
+#외부 조인 한쪽 테이블만 있어도 됨
+
+SELECT M.mem_id, M.mem_name, B.prod_name, M.addr
+FROM member M
+LEFT OUTER JOIN buy B
+ON M.mem_id = B.mem_id
+ORDER BY M.mem_id;
+#LeftOUTER 일 때 : 왼쪽 테이블의 모든 행과 오른쪽 테이블에서 일치하는 행을 결합한 결과
+
+SELECT M.mem_id, M.mem_name, B.prod_name, M.addr
+FROM buy B
+RIGHT OUTER JOIN member M
+ON M.mem_id = B.mem_id
+ORDER BY M.mem_id;
+#RightOUTER 일 때 : 오른쪽 테이블의 모든 행과 왼족 테이블에서 일치하는 행을 결합한 결과
+SELECT DISTINCT M.mem_id, M.mem_name, B.prod_name, M.addr
+FROM buy B
+RIGHT OUTER JOIN member M
+ON M.mem_id = B.mem_id
+WHERE B.prod_name IS NULL
+ORDER BY M.mem_id;
